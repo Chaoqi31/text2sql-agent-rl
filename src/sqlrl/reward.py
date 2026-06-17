@@ -80,3 +80,18 @@ def reward_r2(final_sql, question, toolset, *, ex_fn=execution_match) -> RewardR
               + w["ngram"] * ngram + w["format"] * fmt)
     return RewardResult(reward, ex, {"ex": ex, "syntax": syntax, "schema": round(schema, 3),
                                      "ngram": round(ngram, 3), "format": fmt, "valid_sql": valid})
+
+
+# --- append to src/sqlrl/reward.py ---
+def reward_r3(final_sql, question, toolset, *, ex_fn=execution_match) -> RewardResult:
+    """NAIVE process foil (spec §8.1, Pre-registration) — INTENTIONALLY gameable.
+    0.2*[called describe_table] + 0.3*[emitted an executable SQL] + 1.0*[exec match].
+    The first two terms can be farmed to 0.5 without solving; this is the planned
+    reward-hacking exhibit, NOT a serious reward design."""
+    called_describe = any(name == "describe_table" for name, _ in toolset.calls)
+    executable = bool(final_sql) and executes_ok(question.db_path, final_sql)
+    valid = _is_select(final_sql)
+    ex = ex_fn(final_sql, question.gold_sql, question.db_path) if valid else 0
+    reward = 0.2 * float(called_describe) + 0.3 * float(executable) + 1.0 * float(ex)
+    return RewardResult(reward, ex, {"called_describe": called_describe,
+                                     "executable": executable, "ex": ex})
