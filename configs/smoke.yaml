@@ -1,0 +1,3 @@
+questions_jsonl: "data/bird/train_filtered.jsonl"
+n_questions: 2
+max_turns: 8

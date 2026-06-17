@@ -1,0 +1,4 @@
+bird_json: "data/bird/train.json"
+db_root: "data/bird/train_databases"
+out_jsonl: "data/bird/train_filtered.jsonl"
+difficulties: ["moderate", "challenging"]
