@@ -43,3 +43,11 @@ def test_invalid_sql_zero(tiny_db):
     r = reward_r2(None, _q(tiny_db), ts)
     assert r.reward == 0.0 and r.ex == 0
     ts.close()
+
+
+def test_non_select_and_blank_get_zero(tiny_db):
+    ts = SqlToolset(tiny_db)
+    for bad in ("DELETE FROM customers", "DROP TABLE customers", "   ", None):
+        r = reward_r2(bad, _q(tiny_db), ts)
+        assert r.reward == 0.0 and r.ex == 0
+    ts.close()

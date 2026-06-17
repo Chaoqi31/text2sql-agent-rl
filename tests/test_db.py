@@ -41,3 +41,10 @@ def test_timeout_interrupts_runaway(tiny_db):
 def test_executes_ok(tiny_db):
     assert executes_ok(tiny_db, "SELECT 1") is True
     assert executes_ok(tiny_db, "SELECT nope FROM customers") is False
+
+
+def test_attach_denied_by_authorizer(tiny_db):
+    import sqlite3, pytest
+    conn = connect_ro(tiny_db)
+    with pytest.raises(sqlite3.DatabaseError):
+        conn.execute("ATTACH DATABASE ':memory:' AS m")

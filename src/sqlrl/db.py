@@ -2,16 +2,22 @@
 import sqlite3
 import threading
 
-# Secondary guard only — connect_ro's mode=ro is the primary, engine-level enforcement.
+# Read-only is engine-enforced: mode=ro URI + PRAGMA query_only + an authorizer that denies ATTACH.
+# _WRITE_TOKENS below is a secondary guard for clearer error messages on obvious writes.
 _WRITE_TOKENS = ("insert", "update", "delete", "drop", "alter", "create", "replace",
                  "attach", "detach", "pragma", "vacuum", "reindex", "truncate", "begin",
                  "commit")
+
+
+def _deny_attach(action, arg1, arg2, db_name, trigger):
+    return sqlite3.SQLITE_DENY if action == sqlite3.SQLITE_ATTACH else sqlite3.SQLITE_OK
 
 
 def connect_ro(db_path: str) -> sqlite3.Connection:
     # check_same_thread=False so the timeout Timer thread may call conn.interrupt()
     conn = sqlite3.connect(f"file:{db_path}?mode=ro", uri=True, check_same_thread=False)
     conn.execute("PRAGMA query_only = ON")
+    conn.set_authorizer(_deny_attach)
     return conn
 
 

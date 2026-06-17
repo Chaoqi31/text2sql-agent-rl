@@ -72,9 +72,9 @@ def reward_r2(final_sql, question, toolset, *, ex_fn=execution_match) -> RewardR
     valid = _is_select(final_sql)
     ex = ex_fn(final_sql, question.gold_sql, question.db_path) if valid else 0
     syntax = 1.0 if (valid and executes_ok(question.db_path, final_sql)) else 0.0
-    schema = _schema_link_jaccard(final_sql, question.gold_sql) if final_sql else 0.0
-    ngram = _bigram_jaccard(final_sql, question.gold_sql) if final_sql else 0.0
-    fmt = 1.0 if final_sql else 0.0
+    schema = _schema_link_jaccard(final_sql, question.gold_sql) if valid else 0.0
+    ngram = _bigram_jaccard(final_sql, question.gold_sql) if valid else 0.0
+    fmt = 1.0 if valid else 0.0
     w = R2_WEIGHTS
     reward = (w["exec"] * ex + w["syntax"] * syntax + w["schema"] * schema
               + w["ngram"] * ngram + w["format"] * fmt)

@@ -45,3 +45,10 @@ def test_reset_clears_calls(tiny_db):
     ts.reset()
     assert ts.calls == []
     ts.close()
+
+
+def test_describe_table_injection_rejected(tiny_db):
+    ts = SqlToolset(tiny_db)
+    out = ts.describe_table("customers') UNION SELECT 1,2--")
+    assert "no such table" in out
+    ts.close()

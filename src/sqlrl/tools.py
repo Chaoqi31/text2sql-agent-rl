@@ -17,16 +17,19 @@ class SqlToolset:
     def close(self) -> None:
         self.conn.close()
 
-    def list_tables(self) -> str:
+    def _table_names(self) -> list[str]:
         rows, err = run_query(
             self.conn, "SELECT name FROM sqlite_master WHERE type='table' ORDER BY name",
             timeout_s=self.timeout_s, max_rows=1000, max_cell=self.max_cell)
-        if err:
-            return f"Error: {err}"
-        names = [r[0] for r in rows]
+        return [] if err else [r[0] for r in rows]
+
+    def list_tables(self) -> str:
+        names = self._table_names()
         return "Tables: " + ", ".join(names) if names else "No tables."
 
     def describe_table(self, table: str, sample_rows: int = 3) -> str:
+        if table not in self._table_names():
+            return f"Error: no such table: {table}"
         cols, err = run_query(
             self.conn, f"SELECT name, type FROM pragma_table_info('{table}')",
             timeout_s=self.timeout_s, max_rows=500, max_cell=self.max_cell)
