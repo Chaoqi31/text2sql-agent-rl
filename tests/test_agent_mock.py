@@ -12,6 +12,7 @@ def _q(db):
 def test_extract_final_sql():
     assert extract_final_sql("reasoning...\nFINAL SQL: SELECT 1;") == "SELECT 1"
     assert extract_final_sql("no marker here") is None
+    assert extract_final_sql("FINAL SQL: SELECT name FROM t\nThis should work.") == "SELECT name FROM t"
 
 
 def test_agentic_loop_inspects_then_answers(tiny_db):
@@ -37,6 +38,8 @@ def test_single_shot_first_run_sql_is_answer_not_dispatched(tiny_db):
     r = run_agent(client, "mock", _q(tiny_db), ts, AgentConfig(max_turns=8, single_shot=True))
     assert r.finished and r.final_sql == "SELECT name FROM customers WHERE city='NYC'"
     assert [c[0] for c in ts.calls] == ["describe_table"]
+    assert r.tool_calls == [("describe_table", {"table": "customers"}),
+                            ("run_sql", {"query": "SELECT name FROM customers WHERE city='NYC'"})]
     assert r.turns == 2
     ts.close()
 

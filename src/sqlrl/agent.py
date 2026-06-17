@@ -10,7 +10,7 @@ _SYSTEM = (
     "When confident, output the final query on its own line exactly as:\n"
     "FINAL SQL: <single SELECT query>"
 )
-_FINAL_RE = re.compile(r"FINAL\s+SQL:\s*(.+)", re.IGNORECASE | re.DOTALL)
+_FINAL_RE = re.compile(r"FINAL\s+SQL:\s*([^\n]+)", re.IGNORECASE)
 
 
 def extract_final_sql(text: str) -> str | None:
@@ -40,12 +40,18 @@ def run_agent(client, model_name: str, question, toolset, cfg) -> AgentRollout:
 
     for turns in range(1, cfg.max_turns + 1):
         resp = client.chat.completions.create(
-            messages=messages, tools=toolset.tool_specs,
+            model=model_name, messages=messages, tools=toolset.tool_specs,
             temperature=cfg.temperature, max_tokens=cfg.max_tokens)
         msg = resp.choices[0].message
         calls = msg.tool_calls or []
-        messages.append({"role": "assistant", "content": msg.content,
-                         "tool_calls": [c.function.name for c in calls]})
+        assistant_msg = {"role": "assistant", "content": msg.content}
+        if calls:
+            assistant_msg["tool_calls"] = [
+                {"id": c.id, "type": "function",
+                 "function": {"name": c.function.name, "arguments": c.function.arguments}}
+                for c in calls
+            ]
+        messages.append(assistant_msg)
 
         fs = extract_final_sql(msg.content or "")
         if fs is not None:
@@ -64,7 +70,7 @@ def run_agent(client, model_name: str, question, toolset, cfg) -> AgentRollout:
                     final_sql, finished = args.get("query"), True
                     break
                 result = toolset.dispatch(name, args)
-                messages.append({"role": "tool", "name": name, "content": result})
+                messages.append({"role": "tool", "tool_call_id": c.id, "name": name, "content": result})
             if finished:
                 break
             continue
