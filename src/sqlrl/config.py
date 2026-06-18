@@ -37,7 +37,8 @@ class TrainSettings(BaseModel):
     # LoRA (target_modules fixed in Phase -1 by dumping the module tree)
     lora_rank: int = 16
     lora_alpha: int = 32
-    lora_target_modules: list[str] = ["gate_proj", "up_proj", "down_proj"]
+    lora_target_modules: list[str] = ["gate_proj", "up_proj", "down_proj",
+                                      "q_proj", "k_proj", "v_proj", "o_proj"]
     # rollout engine
     vllm_gpu_memory_utilization: float = 0.40
 

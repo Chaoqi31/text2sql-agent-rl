@@ -21,5 +21,8 @@ max_tokens: 1024
 # DeltaNet (linear_attention) layers lack q/k/v/o_proj; baseline = MLP + full_attention proj.
 lora_rank: 16
 lora_alpha: 32
-lora_target_modules: ["gate_proj", "up_proj", "down_proj"]
+# Qwen3.5 module dump (Phase -1.2): 32 layers = 24 linear_attn (DeltaNet) + 8 full_attention.
+# MLP gate/up/down on all 32; q/k/v/o_proj exist on the 8 full_attention layers. DeltaNet
+# in_proj_*/out_proj left un-adapted for R1 (opt-in later).
+lora_target_modules: ["gate_proj", "up_proj", "down_proj", "q_proj", "k_proj", "v_proj", "o_proj"]
 vllm_gpu_memory_utilization: 0.40

@@ -10,15 +10,17 @@ MODE="${1:-base}"
 BASE_MODEL="${BASE_MODEL:-/root/autodl-tmp/text2sql/models/Qwen3.5-9B}"
 PORT="${PORT:-8000}"
 MAXLEN="${MAXLEN:-8192}"
-# Qwen2.5 used hermes; CONFIRM Qwen3.5's parser in Phase -1.3 and override if needed.
-PARSER="${TOOL_PARSER:-hermes}"
+# Qwen3.5 tool-call parser is qwen3_coder (per official model card, Phase -1.2).
+PARSER="${TOOL_PARSER:-qwen3_coder}"
 
 # Blackwell sm_120 workarounds (prior-project-confirmed): flashinfer JIT sampler mis-detects the
 # arch and aborts; enforce-eager + sampler off make `vllm serve` start.
 export TORCH_CUDA_ARCH_LIST="${TORCH_CUDA_ARCH_LIST:-12.0}"
 export VLLM_USE_FLASHINFER_SAMPLER="${VLLM_USE_FLASHINFER_SAMPLER:-0}"
 
-COMMON=(--port "$PORT" --max-model-len "$MAXLEN" --enforce-eager
+# --language-model-only: Qwen3.5 is multimodal; skip the vision encoder for text-only SQL
+# (frees VRAM for KV cache). Per the official model card.
+COMMON=(--port "$PORT" --max-model-len "$MAXLEN" --enforce-eager --language-model-only
         --enable-auto-tool-choice --tool-call-parser "$PARSER")
 
 if [[ "$MODE" == "lora" ]]; then
