@@ -1,4 +1,8 @@
-bird_json: "data/bird/train.json"
-db_root: "data/bird/train_databases"
-out_jsonl: "data/bird/train_filtered.jsonl"
-difficulties: ["moderate", "challenging"]
+# Train source: bird23-train-filtered (clean gold). Raw BIRD train.json has dirty gold
+# (e.g. app_store/retail_world gold reference non-existent columns) and NO difficulty labels.
+bird_json: "data/bird/bird23-train-filtered/data/train-00000-of-00001.jsonl"
+db_root: "data/bird/train/train_databases"
+out_jsonl: "data/bird/train_prepared.jsonl"
+# null = keep all. BIRD train carries no difficulty field, so [moderate,challenging] would keep 0 rows.
+# Difficulty hardening (spec §6 rung-1) applies to the dev/eval slice only.
+difficulties: null

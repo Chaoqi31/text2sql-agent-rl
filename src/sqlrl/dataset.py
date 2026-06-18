@@ -5,8 +5,19 @@ from pathlib import Path
 from sqlrl.schema import Question
 
 
+def _load_rows(split_json: str) -> list[dict]:
+    """Accept either a JSON array (BIRD raw train.json/dev.json) or JSONL
+    (bird23-train-filtered ships line-delimited)."""
+    text = Path(split_json).read_text()
+    try:
+        data = json.loads(text)
+        return data if isinstance(data, list) else [data]
+    except json.JSONDecodeError:
+        return [json.loads(line) for line in text.splitlines() if line.strip()]
+
+
 def load_bird(split_json: str, db_root: str, *, difficulties: set[str] | None = None) -> list[Question]:
-    raw = json.loads(Path(split_json).read_text())
+    raw = _load_rows(split_json)
     out: list[Question] = []
     for r in raw:
         diff = r.get("difficulty", "") or ""

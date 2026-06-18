@@ -19,3 +19,15 @@ def test_load_bird_keeps_all_when_no_filter(tmp_path):
     j = tmp_path / "t.json"
     j.write_text(json.dumps([{"db_id": "a", "question": "x", "SQL": "SELECT 1", "difficulty": "simple"}]))
     assert len(load_bird(str(j), str(tmp_path), difficulties=None)) == 1
+
+
+def test_load_bird_reads_jsonl(tmp_path):
+    # bird23-train-filtered (the clean train source) ships as line-delimited JSONL, not a JSON array
+    j = tmp_path / "filtered.jsonl"
+    j.write_text(
+        '{"db_id": "a", "question": "q1", "SQL": "SELECT 1", "evidence": ""}\n'
+        '{"db_id": "b", "question": "q2", "SQL": "SELECT 2", "evidence": "e"}\n'
+    )
+    qs = load_bird(str(j), str(tmp_path), difficulties=None)
+    assert len(qs) == 2
+    assert qs[1].db_id == "b" and qs[1].gold_sql == "SELECT 2" and qs[1].evidence == "e"
