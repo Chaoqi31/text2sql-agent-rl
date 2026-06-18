@@ -39,7 +39,8 @@ def main() -> None:
                             max_tokens=cfg.max_tokens)
 
     results = run_questions(client, cfg.model_name, questions,
-                            agent_cfg=agent_cfg, reward_fn=reward_r1)
+                            agent_cfg=agent_cfg, reward_fn=reward_r1,
+                            concurrency=cfg.concurrency)
     s = summarize(results)
     print(f"[{args.tag}] {json.dumps(s, indent=2)}")
 

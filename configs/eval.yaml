@@ -8,3 +8,4 @@ n_questions: 100        # 0 = all 500; full BIRD-dev headline is deferred (plan-
 max_turns: 8
 temperature: 0.0        # greedy, reproducible
 max_tokens: 1024
+concurrency: 16         # parallel rollouts against the vLLM server

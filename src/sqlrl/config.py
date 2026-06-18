@@ -53,6 +53,7 @@ class EvalSettings(BaseModel):
     max_turns: int = 8
     temperature: float = 0.0                            # greedy for reproducible eval
     max_tokens: int = 1024
+    concurrency: int = 8                                # parallel rollouts (vLLM batches them)
 
 
 def load_config(path: str, model_cls):
