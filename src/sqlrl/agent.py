@@ -2,14 +2,9 @@
 import json
 import re
 
+from sqlrl.prompts import SYSTEM_PROMPT
 from sqlrl.schema import AgentRollout
 
-_SYSTEM = (
-    "You are a Text-to-SQL agent. Inspect the database with the tools, then answer.\n"
-    "Tools: list_tables; describe_table(table); run_sql(query) — read-only SELECT only.\n"
-    "When confident, output the final query on its own line exactly as:\n"
-    "FINAL SQL: <single SELECT query>"
-)
 _FINAL_RE = re.compile(r"FINAL\s+SQL:\s*([^\n]+)", re.IGNORECASE)
 
 
@@ -29,7 +24,7 @@ def _build_messages(question):
     user = f"Question: {question.question}\nDatabase: {question.db_id}"
     if question.evidence:
         user += f"\nEvidence: {question.evidence}"
-    return [{"role": "system", "content": _SYSTEM}, {"role": "user", "content": user}]
+    return [{"role": "system", "content": SYSTEM_PROMPT}, {"role": "user", "content": user}]
 
 
 def run_agent(client, model_name: str, question, toolset, cfg) -> AgentRollout:
