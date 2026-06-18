@@ -71,7 +71,9 @@ def _bigram_jaccard(pred_sql: str, gold_sql: str) -> float:
 def reward_r2(final_sql, question, toolset, *, ex_fn=execution_match) -> RewardResult:
     valid = _is_select(final_sql)
     ex = ex_fn(final_sql, question.gold_sql, question.db_path) if valid else 0
-    syntax = 1.0 if (valid and executes_ok(question.db_path, final_sql)) else 0.0
+    # ex==1 already proves the query runs; skip the redundant re-execution (and the
+    # 30s-EX vs 5s-executes_ok timeout mismatch that could wrongly zero a slow-correct query)
+    syntax = 1.0 if (valid and (ex == 1 or executes_ok(question.db_path, final_sql))) else 0.0
     schema = _schema_link_jaccard(final_sql, question.gold_sql) if valid else 0.0
     ngram = _bigram_jaccard(final_sql, question.gold_sql) if valid else 0.0
     fmt = 1.0 if valid else 0.0

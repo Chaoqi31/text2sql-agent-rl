@@ -1,2 +1,10 @@
 # Superpowers brainstorming/spec docs — kept on disk, never committed
 docs/superpowers/
+
+# Python caches / build artifacts
+__pycache__/
+*.pyc
+*.egg-info/
+
+# BIRD/Spider datasets (GB-scale, downloaded locally)
+data/

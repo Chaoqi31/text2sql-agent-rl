@@ -45,14 +45,17 @@ class SqlToolset:
         return f"Table {table}:\ncolumns: {header}\nsample:\n{sample_str}"
 
     def run_sql(self, query: str) -> str:
+        # fetch one extra row so we can tell a full result from a truncated one
         rows, err = run_query(self.conn, query, timeout_s=self.timeout_s,
-                              max_rows=self.max_rows, max_cell=self.max_cell)
+                              max_rows=self.max_rows + 1, max_cell=self.max_cell)
         if err:
             return f"Error: {err}"
         if not rows:
             return "(0 rows)"
+        truncated = len(rows) > self.max_rows
+        rows = rows[:self.max_rows]
         body = "\n".join(str(r) for r in rows)
-        note = f"\n(showing first {self.max_rows})" if len(rows) == self.max_rows else ""
+        note = f"\n(showing first {self.max_rows})" if truncated else ""
         return f"{len(rows)} row(s):\n{body}{note}"
 
     def dispatch(self, name: str, args: dict) -> str:

@@ -1,5 +1,6 @@
 # src/sqlrl/runner.py
 from sqlrl.agent import run_agent
+from sqlrl.reward import _is_select
 from sqlrl.schema import RolloutResult
 from sqlrl.tools import SqlToolset
 
@@ -28,6 +29,6 @@ def summarize(results) -> dict:
         "ex_rate": sum(r.ex for r in results) / n,
         "mean_reward": sum(r.reward for r in results) / n,
         "finished_rate": sum(1 for r in results if r.finished) / n,
-        "valid_sql_rate": sum(1 for r in results if r.final_sql) / n,
+        "valid_sql_rate": sum(1 for r in results if _is_select(r.final_sql)) / n,
         "avg_turns": sum(r.turns for r in results) / n,
     }
