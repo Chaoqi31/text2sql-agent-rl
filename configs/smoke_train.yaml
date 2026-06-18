@@ -1,0 +1,21 @@
+# 2-step GRPO smoke — Phase -1.4 green gate (colocated vLLM + GRPO step runs at all).
+base_model: "/root/autodl-tmp/text2sql/models/Qwen3.5-9B"
+run_name: "sqlrl-smoke"
+train_jsonl: "/root/autodl-tmp/text2sql/bird/bird23-train-filtered/data/train-00000-of-00001.jsonl"
+db_root: "/root/autodl-tmp/text2sql/bird/train/train_databases"
+reward_arm: "r1"
+
+steps: 2
+scenarios_per_step: 2
+group_size: 2
+learning_rate: 1.0e-5
+kl_coef: 0.0
+
+max_turns: 4
+temperature: 0.7
+max_tokens: 512
+
+lora_rank: 16
+lora_alpha: 32
+lora_target_modules: ["gate_proj", "up_proj", "down_proj"]
+vllm_gpu_memory_utilization: 0.40

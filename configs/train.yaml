@@ -1,0 +1,25 @@
+# R1 agentic GRPO — mini scale (spec §9). Paths are the AutoDL box layout (setup_autodl.sh).
+base_model: "/root/autodl-tmp/text2sql/models/Qwen3.5-9B"
+run_name: "sqlrl-r1-v1"
+train_jsonl: "/root/autodl-tmp/text2sql/bird/bird23-train-filtered/data/train-00000-of-00001.jsonl"
+db_root: "/root/autodl-tmp/text2sql/bird/train/train_databases"
+reward_arm: "r1"            # plan-2 = r1 only
+
+# GRPO loop
+steps: 60
+scenarios_per_step: 8
+group_size: 8
+learning_rate: 1.0e-5
+kl_coef: 0.0
+
+# rollout
+max_turns: 8
+temperature: 0.7
+max_tokens: 1024
+
+# LoRA — target_modules FINALIZED in Phase -1 by dumping Qwen3.5 module tree.
+# DeltaNet (linear_attention) layers lack q/k/v/o_proj; baseline = MLP + full_attention proj.
+lora_rank: 16
+lora_alpha: 32
+lora_target_modules: ["gate_proj", "up_proj", "down_proj"]
+vllm_gpu_memory_utilization: 0.40

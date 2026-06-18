@@ -42,3 +42,15 @@ def test_r1_reward_adapter_scores_completions(tiny_db):
 def test_system_prompt_is_shared():
     from sqlrl import agent
     assert agent.SYSTEM_PROMPT is SYSTEM_PROMPT     # agent imports the single source
+
+
+def test_train_and_eval_configs_parse():
+    # committed configs must validate against the schema (catches yaml/schema drift)
+    from sqlrl.config import EvalSettings, TrainSettings, load_config
+
+    t = load_config("configs/train.yaml", TrainSettings)
+    assert t.reward_arm == "r1" and t.group_size >= 4 and t.lora_target_modules
+    s = load_config("configs/smoke_train.yaml", TrainSettings)
+    assert s.steps <= 3                              # smoke must stay tiny
+    e = load_config("configs/eval.yaml", EvalSettings)
+    assert e.base_url.endswith("/v1") and e.eval_json and e.temperature == 0.0
