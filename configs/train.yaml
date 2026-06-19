@@ -1,12 +1,12 @@
 # R1 agentic GRPO — mini scale (spec §9). Paths are the AutoDL box layout (setup_autodl.sh).
 base_model: "/root/autodl-tmp/text2sql/models/Qwen3.5-9B"
 run_name: "sqlrl-r1-v1"
-train_jsonl: "/root/autodl-tmp/text2sql/bird/bird23-train-filtered/data/train-00000-of-00001.jsonl"
+train_jsonl: "/root/autodl-tmp/text2sql/bird/train_exec_filtered.jsonl"   # gold execution-filtered (scripts/filter_data.py)
 db_root: "/root/autodl-tmp/text2sql/bird/train/train_databases"
-reward_arm: "r1"            # plan-2 = r1 only
+reward_arm: "r1"            # override per-arm with --reward-arm for the sweep (r1/r2/r3/s0)
 
-# GRPO loop
-steps: 60
+# GRPO loop — scaled up from the 60-step pilot (the back half is where EX gain showed)
+steps: 150
 scenarios_per_step: 8
 group_size: 4            # B6000 96GB: group 8 OOM'd at step 0; 4 still a valid group-relative baseline
 learning_rate: 1.0e-5

@@ -2,9 +2,9 @@
 base_url: "http://localhost:8000/v1"
 api_key: "EMPTY"
 model_name: "/root/autodl-tmp/text2sql/models/Qwen3.5-9B"
-eval_json: "/root/autodl-tmp/text2sql/bird/bird_mini_dev/data/mini_dev_sqlite-00000-of-00001.json"
+eval_json: "/root/autodl-tmp/text2sql/bird/dev_20240627/dev.json"   # FULL BIRD-dev (1534 Q)
 db_root: "/root/autodl-tmp/text2sql/bird/dev_20240627/dev_databases"
-n_questions: 100        # 0 = all 500; full BIRD-dev headline is deferred (plan-3)
+n_questions: 0          # 0 = all 1534 (headline); use configs/eval_mini.yaml for quick checks
 max_turns: 8
 temperature: 0.0        # greedy, reproducible
 max_tokens: 1024
