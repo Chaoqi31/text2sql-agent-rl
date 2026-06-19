@@ -21,6 +21,15 @@ def test_load_bird_keeps_all_when_no_filter(tmp_path):
     assert len(load_bird(str(j), str(tmp_path), difficulties=None)) == 1
 
 
+def test_load_bird_reads_gold_sql_key(tmp_path):
+    # filter_data.py / prepare_data.py write Question.__dict__ (key "gold_sql", not "SQL");
+    # load_bird must read it back or every gold becomes "" -> all EX=0 -> reward collapses.
+    j = tmp_path / "q.jsonl"
+    j.write_text('{"db_id": "x", "question": "q", "gold_sql": "SELECT 1", "evidence": ""}\n')
+    qs = load_bird(str(j), str(tmp_path))
+    assert qs[0].gold_sql == "SELECT 1"
+
+
 def test_load_bird_reads_jsonl(tmp_path):
     # bird23-train-filtered (the clean train source) ships as line-delimited JSONL, not a JSON array
     j = tmp_path / "filtered.jsonl"

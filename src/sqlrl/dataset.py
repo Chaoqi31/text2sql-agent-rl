@@ -27,7 +27,7 @@ def load_bird(split_json: str, db_root: str, *, difficulties: set[str] | None = 
         out.append(Question(
             db_id=db_id,
             question=r["question"],
-            gold_sql=(r.get("SQL") or r.get("query") or ""),
+            gold_sql=(r.get("SQL") or r.get("query") or r.get("gold_sql") or ""),
             db_path=str(Path(db_root) / db_id / f"{db_id}.sqlite"),
             evidence=(r.get("evidence") or ""),
             difficulty=diff,
