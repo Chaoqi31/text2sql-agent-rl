@@ -30,9 +30,10 @@ from sqlrl.agent import _build_messages  # noqa: E402  (same prompt construction
 from sqlrl.config import TrainSettings, load_config  # noqa: E402
 from sqlrl.dataset import load_bird  # noqa: E402
 from sqlrl.train_env import make_sql_env_factory  # noqa: E402
-from sqlrl.train_reward import make_r1_reward  # noqa: E402
+from sqlrl.train_reward import make_r1_reward, make_r2_reward, make_r3_reward  # noqa: E402
 
-_REWARDS = {"r1": make_r1_reward}   # r2/r3/s0 added in plan-3
+# s0 = r1 reward + single-shot loop topology (plan-3 Task A.3); reward fn is r1.
+_REWARDS = {"r1": make_r1_reward, "r2": make_r2_reward, "r3": make_r3_reward, "s0": make_r1_reward}
 
 
 def build_dataset(questions) -> Dataset:
@@ -47,12 +48,18 @@ def main() -> None:
     ap.add_argument("--config", default="configs/train.yaml")
     ap.add_argument("--steps", type=int, default=None)
     ap.add_argument("--base-model", default=None)
+    ap.add_argument("--reward-arm", default=None, help="override reward arm (r1/r2/r3/s0) for the sweep")
+    ap.add_argument("--run-name", default=None, help="override run_name (per-arm output dir)")
     ap.add_argument("--resume", default=None, help="checkpoint dir to resume GRPO from")
     args = ap.parse_args()
 
     cfg = load_config(args.config, TrainSettings)
     if args.base_model:
         cfg.base_model = args.base_model
+    if args.reward_arm:
+        cfg.reward_arm = args.reward_arm
+    if args.run_name:
+        cfg.run_name = args.run_name
     if args.steps:
         cfg.steps = args.steps
     if cfg.reward_arm not in _REWARDS:
@@ -74,7 +81,8 @@ def main() -> None:
         beta=cfg.kl_coef,
         temperature=cfg.temperature,
         scale_rewards=True,
-        max_tool_calling_iterations=cfg.max_turns,
+        # S0 single-shot proxy: one tool round then must answer (no multi-turn self-correction)
+        max_tool_calling_iterations=(1 if cfg.reward_arm == "s0" else cfg.max_turns),
         max_completion_length=cfg.max_tokens,
         use_vllm=True,
         vllm_mode="colocate",

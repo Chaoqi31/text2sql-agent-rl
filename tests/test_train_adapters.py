@@ -39,6 +39,37 @@ def test_r1_reward_adapter_scores_completions(tiny_db):
     assert out == [1.0, 0.0, 0.0, 1.0]
 
 
+def test_r2_reward_adapter_scores_completions(tiny_db):
+    from sqlrl.train_reward import make_r2_reward
+    reward = make_r2_reward()
+    comps = [
+        [{"role": "assistant", "content": f"FINAL SQL: {GOLD}"}],                    # correct -> 3+1+1+1+1
+        [{"role": "assistant", "content": "FINAL SQL: SELECT name FROM customers"}],  # wrong-but-valid
+        [{"role": "assistant", "content": "FINAL SQL: DELETE FROM customers"}],       # non-SELECT
+    ]
+    out = reward(prompts=None, completions=comps, gold_sql=[GOLD] * 3, db_path=[tiny_db] * 3)
+    assert out[0] == 7.0
+    assert 2.5 <= out[1] < 7.0          # farmable partial mass with ex=0
+    assert out[2] == 0.0
+
+
+def test_r3_reward_adapter_uses_completion_tool_calls(tiny_db):
+    from sqlrl.train_reward import make_r3_reward
+    reward = make_r3_reward()
+    desc = {"role": "assistant",
+            "tool_calls": [{"id": "c1", "type": "function",
+                            "function": {"name": "describe_table", "arguments": "{}"}}]}
+    comps = [
+        [desc, {"role": "assistant", "content": "FINAL SQL: SELECT name FROM customers"}],  # described + wrong-exec -> 0.5
+        [desc, {"role": "assistant", "content": f"FINAL SQL: {GOLD}"}],                       # described + correct -> 1.5
+        [{"role": "assistant", "content": "no sql"}],                                         # nothing -> 0
+    ]
+    out = reward(prompts=None, completions=comps, gold_sql=[GOLD] * 3, db_path=[tiny_db] * 3)
+    assert abs(out[0] - 0.5) < 1e-9
+    assert abs(out[1] - 1.5) < 1e-9
+    assert out[2] == 0.0
+
+
 def test_system_prompt_is_shared():
     from sqlrl import agent
     assert agent.SYSTEM_PROMPT is SYSTEM_PROMPT     # agent imports the single source
