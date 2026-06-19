@@ -39,3 +39,25 @@ def test_run_questions_concurrent_matches_sequential_and_preserves_order(tiny_db
     par = run_questions(client, "m", qs, agent_cfg=cfg, reward_fn=reward_r1, concurrency=4)
     assert [r.ex for r in seq] == [1] * 6 == [r.ex for r in par]
     assert [r.db_id for r in par] == [f"q{i}" for i in range(6)]   # order preserved
+
+
+class _RaisingClient:
+    chat = None
+    def __init__(self):
+        self.chat = self
+        self.completions = self
+    def create(self, **kwargs):
+        raise RuntimeError("simulated transient API error")
+
+
+def test_run_questions_survives_a_rollout_error(tiny_db):
+    qs = [Question(db_id="ok", question="x", gold_sql=GOLD, db_path=tiny_db),
+          Question(db_id="bad", question="x", gold_sql=GOLD, db_path=tiny_db)]
+    # one good (stateless), one that raises — eval must not crash; the bad one scores 0
+    good = _StatelessClient(GOLD)
+    res_bad = run_questions(_RaisingClient(), "m", [qs[1]], agent_cfg=AgentConfig(max_turns=2),
+                            reward_fn=reward_r1, concurrency=2)
+    assert len(res_bad) == 1 and res_bad[0].ex == 0 and "error" in res_bad[0].breakdown
+    res_good = run_questions(good, "m", [qs[0]], agent_cfg=AgentConfig(max_turns=2),
+                             reward_fn=reward_r1, concurrency=2)
+    assert res_good[0].ex == 1

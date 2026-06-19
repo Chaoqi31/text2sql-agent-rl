@@ -8,16 +8,24 @@ from sqlrl.tools import SqlToolset
 
 
 def _run_one(client, model_name, q, agent_cfg, reward_fn) -> RolloutResult:
-    ts = SqlToolset(q.db_path)
+    # A transient API/db error on one question must NOT crash a full-dev eval (1534 Qs on a
+    # thread pool) — score it 0 (a crashed rollout is a failure) and carry on.
     try:
-        rollout = run_agent(client, model_name, q, ts, agent_cfg)
-        rr = reward_fn(rollout.final_sql, q, ts)
+        ts = SqlToolset(q.db_path)
+        try:
+            rollout = run_agent(client, model_name, q, ts, agent_cfg)
+            rr = reward_fn(rollout.final_sql, q, ts)
+            return RolloutResult(
+                db_id=q.db_id, question=q.question, final_sql=rollout.final_sql,
+                ex=rr.ex, reward=rr.reward, breakdown=rr.breakdown,
+                turns=rollout.turns, finished=rollout.finished)
+        finally:
+            ts.close()
+    except Exception as e:
         return RolloutResult(
-            db_id=q.db_id, question=q.question, final_sql=rollout.final_sql,
-            ex=rr.ex, reward=rr.reward, breakdown=rr.breakdown,
-            turns=rollout.turns, finished=rollout.finished)
-    finally:
-        ts.close()
+            db_id=q.db_id, question=q.question, final_sql=None,
+            ex=0, reward=0.0, breakdown={"error": str(e)[:200]},
+            turns=0, finished=False)
 
 
 def run_questions(client, model_name, questions, *, agent_cfg, reward_fn, concurrency=1):
