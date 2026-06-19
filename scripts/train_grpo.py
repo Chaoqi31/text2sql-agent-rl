@@ -47,6 +47,7 @@ def main() -> None:
     ap.add_argument("--config", default="configs/train.yaml")
     ap.add_argument("--steps", type=int, default=None)
     ap.add_argument("--base-model", default=None)
+    ap.add_argument("--resume", default=None, help="checkpoint dir to resume GRPO from")
     args = ap.parse_args()
 
     cfg = load_config(args.config, TrainSettings)
@@ -62,7 +63,7 @@ def main() -> None:
     tokenizer = AutoTokenizer.from_pretrained(cfg.base_model)
 
     output_dir = str(REPO / "runs" / cfg.run_name)
-    save_strategy, save_steps = ("no", 0) if cfg.steps <= 3 else ("steps", max(5, cfg.steps // 3))
+    save_strategy, save_steps = ("no", 0) if cfg.steps <= 3 else ("steps", max(5, cfg.steps // 6))
     grpo_cfg = GRPOConfig(
         output_dir=output_dir,
         num_generations=cfg.group_size,
@@ -104,7 +105,7 @@ def main() -> None:
         environment_factory=make_sql_env_factory(),
         peft_config=lora,
     )
-    trainer.train()
+    trainer.train(resume_from_checkpoint=args.resume) if args.resume else trainer.train()
 
     final_dir = Path(output_dir) / "final"
     trainer.save_model(str(final_dir))
