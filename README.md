@@ -172,15 +172,3 @@ python scripts/compare.py --baseline runs/eval_base.jsonl --tuned runs/eval_r2.j
 ```bash
 pytest -q          # 51 offline tests, no GPU required
 ```
-
-## Limitations
-
-- Single training seed (n=1534 makes the deltas significant; a multi-seed CI would fully nail the headline).
-- Config files are pinned to a specific GPU-box path layout — edit before running.
-- Remaining eval losses are mostly context-overflow on long conversations; raising max_tokens / max_turns / context length is the obvious next lever.
-
-## References
-
-- **BIRD benchmark** — Li et al., *Can LLM Already Serve as a Database Interface?* ([arXiv:2305.03111](https://arxiv.org/abs/2305.03111))
-- **R2 partial-reward shaping** adapted from *Reasoning-SQL* ([arXiv:2503.23157](https://arxiv.org/abs/2503.23157)), with the AI-feedback term omitted
-- **Base model** — Qwen3.5-9B
