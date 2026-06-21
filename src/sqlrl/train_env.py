@@ -3,7 +3,7 @@
 # becomes a tool (docstring + type hints -> the JSON schema the model sees); TRL drives
 # generate -> call tool -> feed result -> repeat and masks tool-result tokens from the loss.
 #
-# Unlike prior-project's shared corpus, every BIRD question has its OWN database, so the env binds
+# Unlike a shared-corpus setup (one DB for all questions), every BIRD question has its OWN database, so the env binds
 # its db_path per rollout in reset(). Whether GRPOTrainer passes dataset row columns to
 # reset(**kwargs) is the Phase -1 unknown (plan-2): if it does, db_path arrives here; if not,
 # the binding moves to a custom rollout. Tool NAMES match SqlToolset.tool_specs (fairness).

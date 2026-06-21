@@ -13,7 +13,7 @@ MAXLEN="${MAXLEN:-8192}"
 # Qwen3.5 tool-call parser is qwen3_coder (per official model card, Phase -1.2).
 PARSER="${TOOL_PARSER:-qwen3_coder}"
 
-# Blackwell sm_120 workarounds (prior-project-confirmed): flashinfer JIT sampler mis-detects the
+# Blackwell sm_120 workarounds (empirically confirmed): flashinfer JIT sampler mis-detects the
 # arch and aborts; enforce-eager + sampler off make `vllm serve` start.
 export TORCH_CUDA_ARCH_LIST="${TORCH_CUDA_ARCH_LIST:-12.0}"
 export VLLM_USE_FLASHINFER_SAMPLER="${VLLM_USE_FLASHINFER_SAMPLER:-0}"
