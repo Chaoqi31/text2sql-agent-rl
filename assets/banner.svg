@@ -1,0 +1,27 @@
+<svg viewBox="0 0 1200 260" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system,Segoe UI,Helvetica,Arial,sans-serif">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0d1117"/>
+      <stop offset="1" stop-color="#161b22"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#3fb950"/>
+      <stop offset="1" stop-color="#58a6ff"/>
+    </linearGradient>
+  </defs>
+  <rect x="0" y="0" width="1200" height="260" rx="16" fill="url(#bg)"/>
+  <rect x="0" y="0" width="1200" height="6" rx="3" fill="url(#accent)"/>
+
+  <text x="60" y="108" font-size="52" font-weight="700" fill="#e6edf3">text2sql-agent-rl</text>
+  <text x="62" y="150" font-size="21" fill="#8b949e">Agentic Text-to-SQL trained with reinforcement learning (GRPO)</text>
+
+  <g font-family="ui-monospace,SFMono-Regular,Menlo,monospace">
+    <rect x="62" y="178" width="430" height="34" rx="8" fill="#1f2937" stroke="#30363d"/>
+    <text x="80" y="201" font-size="16" fill="#7ee787">&gt;_ list_tables &#8594; run_sql &#8594; FINAL SQL</text>
+  </g>
+
+  <line x1="900" y1="56" x2="900" y2="204" stroke="#30363d" stroke-width="1"/>
+  <text x="1140" y="120" font-size="66" font-weight="800" fill="#3fb950" text-anchor="end">+7.2 pt</text>
+  <text x="1140" y="152" font-size="17" fill="#8b949e" text-anchor="end">execution accuracy on full BIRD-dev</text>
+  <text x="1140" y="176" font-size="15" fill="#6e7681" text-anchor="end">from a general Qwen3.5-9B base · n=1534</text>
+</svg>

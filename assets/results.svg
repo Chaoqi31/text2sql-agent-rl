@@ -1,0 +1,49 @@
+<svg viewBox="0 0 900 540" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system,Segoe UI,Helvetica,Arial,sans-serif">
+  <rect x="0" y="0" width="900" height="540" rx="16" fill="#0d1117"/>
+  <text x="60" y="46" font-size="26" font-weight="700" fill="#e6edf3">Execution Accuracy &#8212; full BIRD-dev</text>
+  <text x="60" y="70" font-size="15" fill="#8b949e">BIRD official execution-match (set-equality) · greedy decoding · n=1534</text>
+
+  <!-- gridlines + y labels -->
+  <g stroke="#21262d" stroke-width="1" font-size="13" fill="#6e7681">
+    <line x1="90" y1="430" x2="860" y2="430"/><text x="78" y="434" text-anchor="end">0.0</text>
+    <line x1="90" y1="373.3" x2="860" y2="373.3"/><text x="78" y="377.3" text-anchor="end">0.1</text>
+    <line x1="90" y1="316.7" x2="860" y2="316.7"/><text x="78" y="320.7" text-anchor="end">0.2</text>
+    <line x1="90" y1="260" x2="860" y2="260"/><text x="78" y="264" text-anchor="end">0.3</text>
+    <line x1="90" y1="203.3" x2="860" y2="203.3"/><text x="78" y="207.3" text-anchor="end">0.4</text>
+    <line x1="90" y1="146.7" x2="860" y2="146.7"/><text x="78" y="150.7" text-anchor="end">0.5</text>
+    <line x1="90" y1="90" x2="860" y2="90"/><text x="78" y="94" text-anchor="end">0.6</text>
+  </g>
+
+  <!-- base reference line -->
+  <line x1="90" y1="175.1" x2="860" y2="175.1" stroke="#6e7681" stroke-width="1" stroke-dasharray="4 5"/>
+
+  <!-- bars -->
+  <rect x="170" y="175.1" width="120" height="254.9" rx="5" fill="#6e7681"/>
+  <rect x="415" y="148.5" width="120" height="281.5" rx="5" fill="#58a6ff"/>
+  <rect x="660" y="134.5" width="120" height="295.5" rx="5" fill="#3fb950"/>
+
+  <!-- value labels -->
+  <g font-size="19" font-weight="700" text-anchor="middle">
+    <text x="230" y="161" fill="#c9d1d9">0.4498</text>
+    <text x="475" y="134" fill="#58a6ff">0.4967</text>
+    <text x="720" y="120" fill="#3fb950">0.5215</text>
+  </g>
+
+  <!-- delta badges -->
+  <g text-anchor="middle" font-size="14" font-weight="700">
+    <rect x="447" y="92" width="56" height="22" rx="11" fill="#0d2d6b"/><text x="475" y="107" fill="#79c0ff">+4.7</text>
+    <rect x="692" y="78" width="56" height="22" rx="11" fill="#0f3d20"/><text x="720" y="93" fill="#7ee787">+7.2</text>
+  </g>
+
+  <!-- x labels -->
+  <g text-anchor="middle" font-size="15">
+    <text x="230" y="458" fill="#c9d1d9" font-weight="600">Base</text>
+    <text x="230" y="478" fill="#6e7681" font-size="13">Qwen3.5-9B</text>
+    <text x="475" y="458" fill="#c9d1d9" font-weight="600">RL · R1</text>
+    <text x="475" y="478" fill="#6e7681" font-size="13">execution-only</text>
+    <text x="720" y="458" fill="#7ee787" font-weight="600">RL · R2</text>
+    <text x="720" y="478" fill="#6e7681" font-size="13">partial credit</text>
+  </g>
+
+  <text x="860" y="512" text-anchor="end" font-size="13" fill="#6e7681">vs base: R1 p&#8776;0.009 · R2 p&lt;0.0001 (binomial z-test)</text>
+</svg>
