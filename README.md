@@ -1,8 +1,6 @@
 <div align="center">
 
-<img src="assets/banner.svg" alt="text2sql-agent-rl" width="820">
-
-&nbsp;
+# text2sql-agent-rl
 
 [![Python](https://img.shields.io/badge/python-3.11+-3776ab?logo=python&logoColor=white)](https://www.python.org/)
 [![BIRD-dev EX](https://img.shields.io/badge/BIRD--dev%20EX-0.52-3fb950)](#results)
@@ -25,7 +23,7 @@ the agent noticeably more decisive.
 ## Results
 
 <div align="center">
-<img src="assets/results.svg" alt="Execution accuracy on full BIRD-dev" width="620">
+<img src="assets/results.png" alt="Execution accuracy on full BIRD-dev" width="680">
 </div>
 
 | Model | Execution Accuracy | Δ vs base | Finished |
@@ -97,6 +95,16 @@ execution-only and trains faster.
 | `r1` | `exec ∈ {0,1}` | execution-only baseline |
 | `s0` | `exec`, single-shot | ablation — no tool loop |
 | `r3` | `0.2·describe + 0.3·executable + exec` | intentionally gameable foil |
+
+### Training dynamics
+
+<div align="center">
+<img src="assets/training.png" alt="Training dynamics — reward growth and gradient-signal density" width="800">
+</div>
+
+Both reward arms learn — reward climbs over the 150 GRPO steps — but **R2's partial credit keeps far
+more GRPO groups producing a usable gradient** than R1's sparse 0/1 signal, which is the mechanism
+behind its higher final accuracy.
 
 ## Project structure
 
