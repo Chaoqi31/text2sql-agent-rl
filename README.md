@@ -4,7 +4,7 @@
 
 [![Python](https://img.shields.io/badge/python-3.11+-3776ab?logo=python&logoColor=white)](https://www.python.org/)
 [![BIRD-dev EX](https://img.shields.io/badge/BIRD--dev%20EX-0.52-3fb950)](#results)
-[![Tests](https://img.shields.io/badge/tests-51%20passing-3fb950)](#tests)
+[![Tests](https://img.shields.io/badge/tests-57%20passing-3fb950)](#tests)
 [![RL](https://img.shields.io/badge/RL-GRPO%20·%20TRL-58a6ff)](#training)
 [![Serving](https://img.shields.io/badge/serving-vLLM-58a6ff)](#usage)
 
@@ -39,6 +39,23 @@ where the agent commits a final answer — from 82% to 90%.
 > [!NOTE]
 > Single training seed. The deltas are statistically significant at n=1534 (binomial z-test); a
 > multi-seed confidence interval is the natural next step to fully nail the headline number.
+
+### + SFT cold-start (agentic)
+
+A second track adds an **agentic SFT cold-start before GRPO**: the model is first taught the
+tool-use pattern on gold-constructed trajectories (`list_tables → describe_table → FINAL SQL`,
+built from BIRD-train gold — STaR-style), then refined with R2 GRPO. Both stages lift EX:
+
+| Stage | BIRD mini-dev EX | Δ |
+|---|:--:|:--:|
+| Qwen3.5-9B base | 0.422 | — |
+| + agentic SFT cold-start | 0.510 | **+8.8 pt** |
+| + R2 GRPO (100 steps) | 0.530 | **+2.0 pt** |
+
+Evaluated on the full **BIRD mini-dev (500 Q)**; SFT contributes the larger jump, GRPO adds on top
+(reward still rising at the time of writing — full 1534-dev numbers and longer GRPO are in progress).
+A single-turn (schema-in-prompt) SFT variant *hurt* agentic EX (−9.6 pt) — the cold-start data must
+match the agentic eval format, which the gold-trajectory builder ([`scripts/prepare_sft_agentic.py`](scripts/prepare_sft_agentic.py)) does.
 
 ## How it works
 
@@ -121,8 +138,12 @@ src/sqlrl/          core (offline, CPU-testable)
   train_env.py        TRL environment factory (tools as rollout actions)
   train_reward.py     TRL reward adapters
 scripts/            entry points (data prep, train, serve, eval, compare)
-configs/            yaml configs (train / eval / data)
-tests/              51 offline tests
+  prepare_sft_agentic.py  gold-constructed agentic SFT trajectories (cold-start)
+  train_sft.py            SFT (TRL SFTTrainer + LoRA, assistant-only loss, merge)
+  extract_synsql_subset.py / prepare_sft.py   single-turn SFT data path
+  evaluate_singleturn.py  schema-in-prompt eval (diagnostic)
+configs/            yaml configs (train / eval / data / sft / sft_agentic)
+tests/              57 offline tests
 ```
 
 ## Getting started
@@ -149,7 +170,12 @@ python scripts/prepare_data.py --config configs/data.yaml
 python scripts/filter_data.py --in-json <prepared.jsonl> --db-root <train_databases> \
     --out-jsonl train_exec_filtered.jsonl
 
-# 2. train (R2 reward)
+# 2a. (optional) agentic SFT cold-start, then point GRPO at the merged model
+python scripts/prepare_sft_agentic.py --bird-json <train.jsonl> --db-root <train_databases> \
+    --out sft_agentic.jsonl
+python scripts/train_sft.py --config configs/sft_agentic.yaml     # -> runs/<run>/merged
+
+# 2b. train (R2 reward) — from the base, or from the SFT merged model via --base-model
 python scripts/train_grpo.py --config configs/train.yaml --reward-arm r2 --run-name sqlrl-r2
 
 # 3. serve a checkpoint with vLLM (base, or +LoRA adapter)
@@ -164,7 +190,7 @@ python scripts/compare.py --baseline runs/eval_base.jsonl --tuned runs/eval_r2.j
 
 > [!TIP]
 > Config paths point at the GPU-box layout used during development — edit them for your
-> environment. Use `configs/eval_mini.yaml` for a fast 100-question sanity check instead of the
+> environment. Use `configs/eval_mini.yaml` for the 500-question BIRD mini-dev instead of the
 > full 1534-question run.
 
 ## Tests
