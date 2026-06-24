@@ -7,5 +7,5 @@ db_root: "/root/autodl-tmp/text2sql/bird/dev_20240627/dev_databases"
 n_questions: 0          # 0 = all 1534 (headline); use configs/eval_mini.yaml for quick checks
 max_turns: 8
 temperature: 0.0        # greedy, reproducible
-max_tokens: 1024
+max_tokens: 1536        # raised from 1024: cut FINAL-SQL truncation (clipped_ratio ~0.4)
 concurrency: 16         # parallel rollouts against the vLLM server

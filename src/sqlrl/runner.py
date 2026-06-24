@@ -15,9 +15,15 @@ def _run_one(client, model_name, q, agent_cfg, reward_fn) -> RolloutResult:
         try:
             rollout = run_agent(client, model_name, q, ts, agent_cfg)
             rr = reward_fn(rollout.final_sql, q, ts)
+            # ex_fallback: same as strict ex, except an uncommitted rollout is rescored on its
+            # last run_sql query — lets one eval report both strict and salvaged EX.
+            ex_fb = rr.ex
+            if rollout.final_sql is None and rollout.fallback_sql:
+                ex_fb = reward_fn(rollout.fallback_sql, q, ts).ex
+            bd = {**rr.breakdown, "ex_fallback": ex_fb, "fallback_sql": rollout.fallback_sql}
             return RolloutResult(
                 db_id=q.db_id, question=q.question, final_sql=rollout.final_sql,
-                ex=rr.ex, reward=rr.reward, breakdown=rr.breakdown,
+                ex=rr.ex, reward=rr.reward, breakdown=bd,
                 turns=rollout.turns, finished=rollout.finished)
         finally:
             ts.close()
@@ -45,6 +51,7 @@ def summarize(results) -> dict:
     return {
         "n": len(results),
         "ex_rate": sum(r.ex for r in results) / n,
+        "ex_rate_fallback": sum(r.breakdown.get("ex_fallback", r.ex) for r in results) / n,
         "mean_reward": sum(r.reward for r in results) / n,
         "finished_rate": sum(1 for r in results if r.finished) / n,
         "valid_sql_rate": sum(1 for r in results if _is_select(r.final_sql)) / n,

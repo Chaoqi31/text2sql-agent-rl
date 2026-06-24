@@ -1,11 +1,11 @@
-# Quick eval on bird_mini_dev (100 Q) for fast dev-loop checks. Headline uses configs/eval.yaml (full dev).
+# Eval on the FULL BIRD mini-dev (500 Q, 11 dbs) — the SFT/GRPO gate. Headline uses configs/eval.yaml (full 1534 dev).
 base_url: "http://localhost:8000/v1"
 api_key: "EMPTY"
 model_name: "/root/autodl-tmp/text2sql/models/Qwen3.5-9B"
 eval_json: "/root/autodl-tmp/text2sql/bird/bird_mini_dev/data/mini_dev_sqlite-00000-of-00001.json"
 db_root: "/root/autodl-tmp/text2sql/bird/dev_20240627/dev_databases"
-n_questions: 100
+n_questions: 0          # 0 = all 500 mini-dev
 max_turns: 8
 temperature: 0.0
-max_tokens: 1024
+max_tokens: 1536
 concurrency: 16

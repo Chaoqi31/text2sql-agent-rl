@@ -5,7 +5,8 @@ import re
 from sqlrl.prompts import SYSTEM_PROMPT
 from sqlrl.schema import AgentRollout
 
-_FINAL_RE = re.compile(r"FINAL\s+SQL:\s*([^\n]+)", re.IGNORECASE)
+_FINAL_RE = re.compile(r"FINAL\s+SQL:\s*(.*)", re.IGNORECASE | re.DOTALL)
+_FENCE_RE = re.compile(r"```(?:sql)?\s*(.+?)```", re.IGNORECASE | re.DOTALL)
 
 
 def extract_final_sql(text: str) -> str | None:
@@ -14,7 +15,14 @@ def extract_final_sql(text: str) -> str | None:
     m = _FINAL_RE.search(text)
     if not m:
         return None
-    sql = m.group(1).strip()
+    rest = m.group(1).lstrip()
+    fence = _FENCE_RE.match(rest)
+    if fence:
+        sql = fence.group(1).strip()          # fenced ```sql ...``` keeps multi-line SQL
+    else:
+        # unfenced: first line only (drop next-line prose), then cut same-line trailing
+        # prose after the statement terminator
+        sql = rest.split("\n", 1)[0].split(";", 1)[0].strip()
     if sql.endswith(";"):
         sql = sql[:-1].strip()
     return sql or None
@@ -73,5 +81,9 @@ def run_agent(client, model_name: str, question, toolset, cfg) -> AgentRollout:
         messages.append({"role": "user",
                          "content": "Continue. Use a tool or output 'FINAL SQL: <query>'."})
 
+    # salvage: if the agent never committed a FINAL SQL, fall back to its last run_sql query
+    # (a query it actually executed) so a correct-but-uncommitted answer isn't auto-zeroed.
+    fallback_sql = next((args.get("query") for name, args in reversed(tool_calls)
+                         if name == "run_sql" and args.get("query")), None)
     return AgentRollout(messages=messages, final_sql=final_sql, turns=turns,
-                        finished=finished, tool_calls=tool_calls)
+                        finished=finished, tool_calls=tool_calls, fallback_sql=fallback_sql)

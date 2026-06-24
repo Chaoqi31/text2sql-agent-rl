@@ -43,6 +43,26 @@ class TrainSettings(BaseModel):
     vllm_gpu_memory_utilization: float = 0.40
 
 
+class SftSettings(BaseModel):
+    # SFT cold-start before R2 GRPO (plan WS2). Single-turn: schema-in-prompt -> reasoning -> FINAL SQL.
+    base_model: str                                     # box path, e.g. .../models/Qwen3.5-9B
+    run_name: str = "sqlrl-sft-v1"
+    sft_jsonl: str                                      # output of scripts/prepare_sft.py
+    epochs: float = 2.0
+    learning_rate: float = 1.0e-5
+    max_seq_len: int = 4096
+    per_device_batch_size: int = 4
+    grad_accum: int = 8
+    assistant_only_loss: bool = False                  # True for agentic data: train only on
+                                                       # assistant turns (tool calls + FINAL SQL)
+    # LoRA — same targets as GRPO (config consistency)
+    lora_rank: int = 16
+    lora_alpha: int = 32
+    lora_target_modules: list[str] = ["gate_proj", "up_proj", "down_proj",
+                                      "q_proj", "k_proj", "v_proj", "o_proj"]
+    merge_after: bool = True                            # merge adapter into base -> runs/<run_name>/merged
+
+
 class EvalSettings(BaseModel):
     base_url: str = "http://localhost:8000/v1"          # vllm serve OpenAI-compat endpoint
     api_key: str = "EMPTY"                              # vLLM ignores it; SDK requires a value

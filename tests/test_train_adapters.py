@@ -80,7 +80,7 @@ def test_train_and_eval_configs_parse():
     from sqlrl.config import EvalSettings, TrainSettings, load_config
 
     t = load_config("configs/train.yaml", TrainSettings)
-    assert t.reward_arm == "r1" and t.group_size >= 4 and t.lora_target_modules
+    assert t.reward_arm == "r2" and t.group_size >= 4 and t.lora_target_modules
     s = load_config("configs/smoke_train.yaml", TrainSettings)
     assert s.steps <= 3                              # smoke must stay tiny
     e = load_config("configs/eval.yaml", EvalSettings)

@@ -1,0 +1,18 @@
+# SFT cold-start (plan WS2). Box paths (AutoDL). Run BEFORE R2 GRPO; set train.yaml
+# base_model to runs/sqlrl-sft-v1/merged afterwards. Single-turn schema-in-prompt format.
+base_model: "/root/autodl-tmp/text2sql/models/Qwen3.5-9B"
+run_name: "sqlrl-sft-v1"
+sft_jsonl: "/root/autodl-tmp/text2sql/sft/sft_13k.jsonl"   # 6.5k SynSQL (balanced) + 6583 BIRD
+
+# Qwen3.5 DeltaNet runs the slow torch fallback (fla/causal-conv1d uncompilable on cu130) →
+# ~0.9 samples/s. Scoped to 1 epoch / 13k / seq2048 for a ~4h run on one 96GB GPU.
+epochs: 1.0
+learning_rate: 1.0e-5
+max_seq_len: 2048
+per_device_batch_size: 2
+grad_accum: 16
+
+lora_rank: 16
+lora_alpha: 32
+lora_target_modules: ["gate_proj", "up_proj", "down_proj", "q_proj", "k_proj", "v_proj", "o_proj"]
+merge_after: true            # -> runs/sqlrl-sft-v1/merged (point GRPO base_model here)

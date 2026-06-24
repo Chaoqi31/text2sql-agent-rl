@@ -20,6 +20,7 @@ def _summary(rows: list[dict]) -> dict:
     return {
         "n": len(rows),
         "ex_rate": sum(r["ex"] for r in rows) / n,
+        "ex_rate_fallback": sum(r.get("breakdown", {}).get("ex_fallback", r["ex"]) for r in rows) / n,
         "mean_reward": sum(r["reward"] for r in rows) / n,
         "valid_sql_rate": sum(1 for r in rows if r.get("final_sql")) / n,
         "finished_rate": sum(1 for r in rows if r.get("finished")) / n,
@@ -29,7 +30,8 @@ def _summary(rows: list[dict]) -> dict:
 
 def compare(baseline_rows: list[dict], tuned_rows: list[dict]) -> dict:
     b, t = _summary(baseline_rows), _summary(tuned_rows)
-    return {"baseline": b, "tuned": t, "ex_delta": t["ex_rate"] - b["ex_rate"]}
+    return {"baseline": b, "tuned": t, "ex_delta": t["ex_rate"] - b["ex_rate"],
+            "ex_delta_fallback": t["ex_rate_fallback"] - b["ex_rate_fallback"]}
 
 
 def main() -> None:

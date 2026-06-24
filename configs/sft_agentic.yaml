@@ -1,0 +1,18 @@
+# Agentic SFT cold-start (the FIX): gold-constructed tool-use trajectories from BIRD-train.
+# Replaces the single-turn SFT that HURT agentic EX (0.422->0.326). Matches the agentic eval/RL
+# format. Box paths (AutoDL). Run BEFORE R2 GRPO; set train.yaml base_model to the merged dir.
+base_model: "/root/autodl-tmp/text2sql/models/Qwen3.5-9B"
+run_name: "sqlrl-sft-agentic-v1"
+sft_jsonl: "/root/autodl-tmp/text2sql/sft/sft_agentic.jsonl"   # 6583 BIRD-train agentic trajectories
+
+epochs: 2.0
+learning_rate: 1.0e-5
+max_seq_len: 2048            # measured p99=1578, max=1633 -> no truncation
+per_device_batch_size: 2
+grad_accum: 16
+assistant_only_loss: true   # train only on assistant turns (tool calls + FINAL SQL), not schema
+
+lora_rank: 16
+lora_alpha: 32
+lora_target_modules: ["gate_proj", "up_proj", "down_proj", "q_proj", "k_proj", "v_proj", "o_proj"]
+merge_after: true           # -> runs/sqlrl-sft-agentic-v1/merged

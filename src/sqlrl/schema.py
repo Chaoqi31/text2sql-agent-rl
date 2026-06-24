@@ -27,6 +27,7 @@ class AgentRollout:
     turns: int
     finished: bool
     tool_calls: list                   # list[tuple[str, dict]]
+    fallback_sql: str | None = None    # last run_sql query, used when no FINAL SQL committed
 
 
 @dataclass
